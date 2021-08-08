@@ -10,7 +10,7 @@ import glob
 url_pattern = r'(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
 
 start_date = "2021-1-1"
-num_of_tweets = 3000
+num_of_tweets = 1750
 filter_list = [
     " -filter:retweets", # Filter out retweets
     " -filter:native_video", # Filter out twitts with videos
@@ -34,13 +34,13 @@ on the category.
 Only 3 more seacrch words for each category total 4 search words per category 
 '''
 search_words_by_category = {
-    "Anger": ["#annoyance", "#angry", "#annoyed", "#Anger"],
-    "Hate": ["#loathe", "#dislike","#hate", "#hating"],
-    "Happiness" : ["#Happiness", "#pleasure", "#joy", "#happy"],
-    "Love" : ["#Love", "#passion", "#caring","#cherish"],
-    "Supprised": ["#Supprised", "#amazed", "#speechless", "#dazed"],
-    "Sadness": ["#Sadness", "#sorrow", "#misery", "#down"],
-    "Depression": ["#Depression", "#melancholy", "#depressed","#gloom"]
+    "Anger": ["annoyance", "angry", "annoyed", "anger"],
+    "Hate": ["loathe", "dislike","hate", "hating"],
+    "Happiness" : ["Happiness", "pleasure", "joy", "happy"],
+    "Love" : ["love", "passion", "caring","cherish"],
+    "Supprised": ["supprised", "amazed", "speechless", "dazed"],
+    "Sadness": ["sadness", "sorrow", "misery", "down"],
+    "Depression": ["depression", "melancholy", "depressed","gloom"]
 }
 
 
@@ -86,7 +86,7 @@ def SearchTwitter(search_word, api):
     tweets = tw.Cursor(api.search,
                         q= search_word,
                         lang = 'en',
-                        since=start_date).items(num_of_tweets)
+                        since=start_date).items(5000)
     return tweets
 
 def ProcessTweest(tweets):
@@ -113,21 +113,19 @@ def ProcessTweest(tweets):
 
     return processed_tweets
 
-def CreateCategoryTweets(category_search_wrods, api):
+def CreateCategoryTweets(category_search_words, api):
     clean_tweets_final = []
-    for word in category_search_wrods:
+    for word in category_search_words:
         tweets = SearchTwitter(word, api)
         clean_tweets = ProcessTweest(tweets)
         for tweet in clean_tweets:
             clean_tweets_final.append(tweet)
     return set(clean_tweets_final)
 
-def CreateDataset(size):
-    global num_of_tweets
-
-    num_of_tweets = size
+def CreateDataset():
     api = TwitterAPIAccess()
     for category in search_words_by_category.keys():
+        print(category)
         tweets = CreateCategoryTweets(search_words_by_category[category], api)
         tweets_cat = [[tweet, category] for tweet in tweets]
         tweet_pd = pd.DataFrame(data=tweets_cat, columns=['tweet', 'label'])
@@ -159,6 +157,6 @@ def Combine_CSVs():
     valid_DF = pd.DataFrame(valid_list, columns=['label', 'tweet']).to_csv(f'{csv_path}\\valid.csv')
     test_DF = pd.DataFrame(test_list, columns=['label', 'tweet']).to_csv(f'{csv_path}\\test.csv')
 
-CreateDataset(7000)
+CreateDataset()
 
 Combine_CSVs()
