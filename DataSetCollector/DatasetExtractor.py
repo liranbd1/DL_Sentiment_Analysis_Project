@@ -10,12 +10,17 @@ import glob
 url_pattern = r'(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
 
 start_date = "2021-1-1"
-num_of_tweets = 1750
+num_of_tweets = 800
 filter_list = [
     " -filter:retweets", # Filter out retweets
     " -filter:native_video", # Filter out twitts with videos
     " -filter:links", # Filter out twitts with URLs in them , Not sure this is good for us
 ]
+
+tweets_pulled = 0
+def set_tweets_pulled(value):
+    global tweets_pulled
+    tweets_pulled = value
 
 categories_index = {
     "Anger": 0,
@@ -82,40 +87,51 @@ def add_filters(search_word):
     return filtered_search
 
 def SearchTwitter(search_word, api):
+    print("Start search...")
     search_word = add_filters(search_word)
     tweets = tw.Cursor(api.search,
                         q= search_word,
                         lang = 'en',
-                        since=start_date).items(5000)
+                        since=start_date).items(num_of_tweets)
+    print("Completed search...")
+    count = 0
+    for _ in tweets: count+=1
+    print(f"Total tweets: {count}")
+    set_tweets_pulled(count)
     return tweets
 
 def ProcessTweest(tweets):
     processed_tweets = []
-    
+    count = 0
     for tweet in tweets:
         # Using emojis description - Gives more info
         emoji_to_decription = demoji.replace_with_desc(tweet.text, sep=" ")
         # Removing mentions of other users or groups not relevant
         remove_mentions = re.sub('@[A-Za-z]*', " ", emoji_to_decription, flags=re.I)
         # Removing URLS from the tweet
+
         urls_in_tweet = re.findall(url_pattern, remove_mentions)
         clean_urls = remove_mentions
         for match in urls_in_tweet:
             url = match[0]
             clean_urls = clean_urls.replace(url, '')
         # Removes extra spaces in start and end
+
         clean_extra_spaces = clean_urls.strip()
         # Cleaning the # from the hashtags to use them as words
+
         clean_tweet = re.sub('[^a-zA-Z0-9 \.]', "", clean_extra_spaces, flags=re.I)
         if clean_tweet not in processed_tweets:
             processed_tweets.append(clean_tweet)
-        
-
+        count += 1
+        print(f"Completed: {count*100/tweets_pulled} % ")
+    print("Finished Processing...")
     return processed_tweets
 
 def CreateCategoryTweets(category_search_words, api):
     clean_tweets_final = []
     for word in category_search_words:
+        print(word)
         tweets = SearchTwitter(word, api)
         clean_tweets = ProcessTweest(tweets)
         for tweet in clean_tweets:
