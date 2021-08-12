@@ -10,7 +10,7 @@ import glob
 url_pattern = r'(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
 
 start_date = "2021-1-1"
-num_of_tweets = 800
+num_of_tweets = 1750
 filter_list = [
     " -filter:retweets", # Filter out retweets
     " -filter:native_video", # Filter out twitts with videos
@@ -94,18 +94,17 @@ def SearchTwitter(search_word, api):
                         lang = 'en',
                         since=start_date).items(num_of_tweets)
     print("Completed search...")
-    count = 0
-    for _ in tweets: count+=1
-    print(f"Total tweets: {count}")
-    set_tweets_pulled(count)
-    return tweets
+    tweet_list = [tweet.text for tweet in tweets]
+    print(f"Total tweets: {len(tweet_list)}")
+    set_tweets_pulled(len(tweet_list))
+    return tweet_list
 
 def ProcessTweest(tweets):
     processed_tweets = []
-    count = 0
+    #count = 0
     for tweet in tweets:
         # Using emojis description - Gives more info
-        emoji_to_decription = demoji.replace_with_desc(tweet.text, sep=" ")
+        emoji_to_decription = demoji.replace_with_desc(tweet, sep=" ")
         # Removing mentions of other users or groups not relevant
         remove_mentions = re.sub('@[A-Za-z]*', " ", emoji_to_decription, flags=re.I)
         # Removing URLS from the tweet
@@ -123,9 +122,10 @@ def ProcessTweest(tweets):
         clean_tweet = re.sub('[^a-zA-Z0-9 \.]', "", clean_extra_spaces, flags=re.I)
         if clean_tweet not in processed_tweets:
             processed_tweets.append(clean_tweet)
-        count += 1
-        print(f"Completed: {count*100/tweets_pulled} % ")
+        #count += 1
+        #print(f"Completed: {count*100/tweets_pulled} % ")
     print("Finished Processing...")
+    print(f"Processed {len(processed_tweets)} tweets")
     return processed_tweets
 
 def CreateCategoryTweets(category_search_words, api):
@@ -143,6 +143,8 @@ def CreateDataset():
     for category in search_words_by_category.keys():
         print(category)
         tweets = CreateCategoryTweets(search_words_by_category[category], api)
+        print(f"Number of tweets {len(tweets)}")
+        print("---"*10)
         tweets_cat = [[tweet, category] for tweet in tweets]
         tweet_pd = pd.DataFrame(data=tweets_cat, columns=['tweet', 'label'])
         tweet_pd.to_csv(path_or_buf=f'C:\\Users\\liranb\\Desktop\\Sentiment Analysis - DL Final Project\\Dataset csvs\\{category}.csv')        
