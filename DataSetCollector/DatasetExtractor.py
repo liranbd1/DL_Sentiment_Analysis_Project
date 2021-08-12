@@ -142,6 +142,8 @@ def CreateDataset():
     api = TwitterAPIAccess()
     for category in search_words_by_category.keys():
         print(category)
+        if category == "Anger" or category == "Happiness" or category == "Hate":
+            continue
         tweets = CreateCategoryTweets(search_words_by_category[category], api)
         print(f"Number of tweets {len(tweets)}")
         print("---"*10)
