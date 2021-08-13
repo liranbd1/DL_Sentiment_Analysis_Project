@@ -27,7 +27,7 @@ categories_index = {
     "Hate": 1,
     "Happiness" : 2,
     "Love" : 3,
-    "Supprised": 4,
+    "Surprised": 4,
     "Saddness": 5,
     "Depression": 6
 }
@@ -43,7 +43,7 @@ search_words_by_category = {
     "Hate": ["loathe", "dislike","hate", "hating"],
     "Happiness" : ["Happiness", "pleasure", "joy", "happy"],
     "Love" : ["love", "passion", "caring","cherish"],
-    "Supprised": ["supprised", "amazed", "speechless", "dazed"],
+    "Surprised": ["surprised", "amazed", "speechless", "dazed"],
     "Sadness": ["sadness", "sorrow", "misery", "down"],
     "Depression": ["depression", "melancholy", "depressed","gloom"]
 }
@@ -142,7 +142,7 @@ def CreateDataset():
     api = TwitterAPIAccess()
     for category in search_words_by_category.keys():
         print(category)
-        if category == "Anger" or category == "Happiness" or category == "Hate":
+        if category == "Anger" or category == "Happiness" or category == "Hate" or category == "Love":
             continue
         tweets = CreateCategoryTweets(search_words_by_category[category], api)
         print(f"Number of tweets {len(tweets)}")
