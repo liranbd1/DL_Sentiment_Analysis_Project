@@ -96,45 +96,14 @@ def SearchTwitter(search_word, api):
     print("Completed search...")
     tweet_list = [tweet.text for tweet in tweets]
     print(f"Total tweets: {len(tweet_list)}")
-    set_tweets_pulled(len(tweet_list))
     return tweet_list
-
-def ProcessTweest(tweets):
-    processed_tweets = []
-    #count = 0
-    for tweet in tweets:
-        # Using emojis description - Gives more info
-        emoji_to_decription = demoji.replace_with_desc(tweet, sep=" ")
-        # Removing mentions of other users or groups not relevant
-        remove_mentions = re.sub('@[A-Za-z]*', " ", emoji_to_decription, flags=re.I)
-        # Removing URLS from the tweet
-
-        urls_in_tweet = re.findall(url_pattern, remove_mentions)
-        clean_urls = remove_mentions
-        for match in urls_in_tweet:
-            url = match[0]
-            clean_urls = clean_urls.replace(url, '')
-        # Removes extra spaces in start and end
-
-        clean_extra_spaces = clean_urls.strip()
-        # Cleaning the # from the hashtags to use them as words
-
-        clean_tweet = re.sub('[^a-zA-Z0-9 \.]', "", clean_extra_spaces, flags=re.I)
-        if clean_tweet not in processed_tweets:
-            processed_tweets.append(clean_tweet)
-        #count += 1
-        #print(f"Completed: {count*100/tweets_pulled} % ")
-    print("Finished Processing...")
-    print(f"Processed {len(processed_tweets)} tweets")
-    return processed_tweets
 
 def CreateCategoryTweets(category_search_words, api):
     clean_tweets_final = []
     for word in category_search_words:
         print(word)
         tweets = SearchTwitter(word, api)
-        clean_tweets = ProcessTweest(tweets)
-        for tweet in clean_tweets:
+        for tweet in tweets:
             clean_tweets_final.append(tweet)
     return set(clean_tweets_final)
 
@@ -142,7 +111,7 @@ def CreateDataset():
     api = TwitterAPIAccess()
     for category in search_words_by_category.keys():
         print(category)
-        if category == "Anger" or category == "Happiness" or category == "Hate" or category == "Love":
+        if category == "Anger" or category == "Hate" or category == "Happiness" or category == "Love":
             continue
         tweets = CreateCategoryTweets(search_words_by_category[category], api)
         print(f"Number of tweets {len(tweets)}")
@@ -177,6 +146,10 @@ def Combine_CSVs():
     valid_DF = pd.DataFrame(valid_list, columns=['label', 'tweet']).to_csv(f'{csv_path}\\valid.csv')
     test_DF = pd.DataFrame(test_list, columns=['label', 'tweet']).to_csv(f'{csv_path}\\test.csv')
 
-CreateDataset()
+def main():
+    CreateDataset()
 
-Combine_CSVs()
+    Combine_CSVs()
+
+if __name__ == "__main__":
+    main()

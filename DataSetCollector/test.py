@@ -1,8 +1,13 @@
-import pandas as pd
-import torch
-df = pd.read_csv("C:\\Users\\liranb\\Desktop\\Sentiment Analysis - DL Final Project\\Dataset csvs\\Anger.csv")
+from DatasetExtractor import TwitterAPIAccess
+import tweepy as tw
 
-for idx, row in df.iterrows():
-    if idx == 0:
-        continue
-    print(len(row['tweet']))
+api = TwitterAPIAccess()
+
+search_word = "Hate"
+tweets = tw.Cursor(api.search,
+                    q= search_word,
+                    lang = 'en',
+                    since='1-1-2021').items(10)
+
+for tweet in tweets:
+    print(tweet.text)
