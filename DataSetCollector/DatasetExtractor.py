@@ -146,10 +146,13 @@ def Combine_CSVs():
     valid_DF = pd.DataFrame(valid_list, columns=['label', 'tweet']).to_csv(f'{csv_path}\\valid.csv')
     test_DF = pd.DataFrame(test_list, columns=['label', 'tweet']).to_csv(f'{csv_path}\\test.csv')
 
+
+
+
 def main():
     CreateDataset()
 
     Combine_CSVs()
-
+    
 if __name__ == "__main__":
     main()
